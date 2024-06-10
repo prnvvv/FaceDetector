@@ -18,7 +18,12 @@ previousTime = 0
 while True:
     success, vidObject = capture.read()
 
-    imgRGB = cv2.cvtColor(vidObject, cv2.COLOR_BAYER_BG2RGB)
+    if not success:
+        print("Video Capture failed.")
+        break
+
+    imgRGB = cv2.cvtColor(vidObject, cv2.COLOR_BGR2RGB)
+
     results = FaceDetection.process(imgRGB)
 
     detections = results.detections
@@ -27,14 +32,23 @@ while True:
         for id, detection in enumerate(detections):
             boundingBoxC = detection.location_data.relative_bounding_box
             h, w, c = vidObject.shape
-            boundingBox = int(boundingBoxC.xmin * w), int(boundingBoxC.ymin * h), \
-                int(boundingBoxC.width * w), int(boundingBoxC.height * h)
-            cv2.rectangle(vidObject, (255, 0, 255), 2)
-            cv2.putText(vidObject, f'fps: {int(detection.score[0] * 100)}%', (boundingBox[0], boundingBox[1] - 20), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 255, 0), 3)
-
-    if not success:
-        print("Video Capture failed.")
+            xmin = int(boundingBoxC.xmin * w)
+            ymin = int(boundingBoxC.ymin * h)
+            width = int(boundingBoxC.width * w)
+            height = int(boundingBoxC.height * h)
+            topLeft = (xmin, ymin)
+            bottomRight = (xmin + width, ymin + height)
+            cv2.rectangle(vidObject, topLeft, bottomRight, (255, 0, 255), 2)
+            cv2.putText(vidObject, f'fps: {int(detection.score[0] * 100)}%', (xmin, ymin - 10), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 255, 0), 3)
 
     currentTime = time.time()
     fps = 1 / (currentTime - previousTime)
     previousTime = currentTime
+
+    cv2.imshow("Face Detection", vidObject)
+
+    if cv2.waitKey(1) == ord('q'):
+        break
+
+capture.release()
+cv2.destroyAllWindows()
