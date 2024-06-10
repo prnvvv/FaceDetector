@@ -18,6 +18,17 @@ previousTime = 0
 while True:
     success, vidObject = capture.read()
 
+    imgRGB = cv2.cvtColor(vidObject, cv2.COLOR_BAYER_BG2RGB)
+    results = FaceDetection.process(imgRGB)
+
+    detections = results.detections
+
+    if detections:
+        for id, detection in enumerate(detections):
+            boundingBoxC = detection.location_data.relative_bounding_box
+            h, w, c = vidObject.shape
+            boundingBox = int(boundingBoxC.xmin * w), int(boundingBoxC.ymin * h)
+
     if not success:
         print("Video Capture failed.")
 
