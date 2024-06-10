@@ -9,7 +9,7 @@ if not capture.isOpened:
     exit()
 
 mpFaceDetection = mp.solutions.face_detection
-FaceDetection = mp.solutions.FaceDetection()
+FaceDetection = mpFaceDetection.FaceDetection()
 mpDraw = mp.solutions.drawing_utils
 
 currentTime = 0
@@ -27,7 +27,10 @@ while True:
         for id, detection in enumerate(detections):
             boundingBoxC = detection.location_data.relative_bounding_box
             h, w, c = vidObject.shape
-            boundingBox = int(boundingBoxC.xmin * w), int(boundingBoxC.ymin * h)
+            boundingBox = int(boundingBoxC.xmin * w), int(boundingBoxC.ymin * h), \
+                int(boundingBoxC.width * w), int(boundingBoxC.height * h)
+            cv2.rectangle(vidObject, (255, 0, 255), 2)
+            cv2.putText(vidObject, f'fps: {int(detection.score[0] * 100)}%', (boundingBox[0], boundingBox[1] - 20), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 255, 0), 3)
 
     if not success:
         print("Video Capture failed.")
